@@ -79,6 +79,14 @@ body {
   width: auto;
 }
 
+#information {
+  top: 30vh;
+  width: 200px;
+  padding: 15px;
+  display: inline-block;
+  position: fixed;
+}
+
 #footer {
     position: absolute;
     bottom: 0;
