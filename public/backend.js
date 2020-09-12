@@ -1,5 +1,5 @@
 document.getElementById("game").style.display = "none"; // Hides game interface
-
+document.getElementById("results").style.display = "none" // Hides results interface
 class HSLColor { // Class which holds 3 values for a color (h, s, l)
     constructor(h, s, l) {
         this.h = h;
@@ -10,13 +10,16 @@ class HSLColor { // Class which holds 3 values for a color (h, s, l)
     
 var currentColor = null; // variable which holds current color values in HSL
 var buffer = 25;
+var totalRounds = 10;
 var totalScore = 0;
+var roundNumber = 0;
 
 function createNewColor() { // changes the color to a random color within certain "buffer" parameters
     var h = Math.round(360 * Math.random());
-    var s = Math.round((100 - 2 * buffer) * Math.random() + buffer);
-    var l = Math.round((100 - 2 * buffer) * Math.random() + buffer);
+    var s = Math.round((50 - ((100 - 2 * buffer) * Math.random() + buffer)) * 0.8 + 50); // The formula accounts for a margin space between the circle
+    var l = Math.round((50 - ((100 - 2 * buffer) * Math.random() + buffer)) * 0.8 + 50); // and the edge (so the circle is not overlapping with the edge of pf)
     currentColor = new HSLColor(h, s, l);
+    console.log(currentColor);
 }
 
 function changePfColor() {
@@ -29,12 +32,30 @@ function changePfColorSpcfc(h, s, l) {
     document.getElementById("pf").style.background = "HSL(" + h + ", " + s + "%, " + l + "%)";
 }
 
-async function runRound() {
-    changePfColor()
-    document.getElementById("pfCntr").style.color = 'white';
-    document.getElementById("pfText").innerHTML = ""
-    await new Promise(r => setTimeout(r, 500));
+function resetPlayfield() {
+    document.getElementById("circle").style.display = "none";
+    document.getElementById("circleCorrect").style.display = "none";
+    document.getElementById("circle").innerHTML = ""
+    document.getElementById("circleCorrect").innerHTML = ""
 
+    document.getElementById("nextRoundButton").style.display = "none";
+    document.getElementById("resultsButton").style.display = "none";
+    
+    document.getElementById("roundScore").innerHTML = "Round Score: ";
+    document.getElementById("totalScore").innerHTML = "Total: " + totalScore;
+    
+}
+
+
+async function runRound() {
+    roundNumber += 1;
+    document.getElementById("roundNumber").innerHTML = "Round # " + roundNumber;
+    resetPlayfield()
+    await new Promise(r => setTimeout(r, 500));
+    changePfColor()
+    document.getElementById("pfText").innerHTML = ""
+    document.getElementById("pfCntr").style.color = 'white';
+    document.getElementById("pfText").style.display = "block"
     for(var i = 3; i > 0; i--) { // Countdown
         document.getElementById("pfText").innerHTML = i
     await new Promise(r => setTimeout(r, 1000));
@@ -58,7 +79,7 @@ async function runRound() {
         return {x, y}
       }
 
-       function usePosition(e) {
+       function usePosition(e) { // Uses mouse's position to determine color and posiion of circle
         var position = getPosition(e);
         //document.getElementById("posvalues").innerHTML = "X: " + position.x + "| Y: " + position.y;
         circle.style.left = e.pageX + 'px'; // Moves circle to cursor
@@ -67,11 +88,9 @@ async function runRound() {
         var tempS = (position.x / pf.offsetWidth) * (100 - 2 * buffer) + buffer;
         var tempL = ((pf.offsetHeight - position.y) / pf.offsetHeight) * (100 - 2 * buffer) + buffer;
         circle.style.background = "HSL(" + currentColor.h + ", " + tempS + "%, " + tempL + "%)"; // Changes color based on position
-        document.getElementById("circle").style.color = "HSL(0, 0, " + 100 - tempL + ")";
-        document.getElementById("circleCorrect").style.color = "HSL(0, 0, " + 100 - currentColor.l + ")";
       }
 
-       function finishRound(e) {
+        async function finishRound(e) {
           pf.removeEventListener('click', finishRound)
           pf.removeEventListener('mousemove', usePosition)
         var x = Math.floor(e.clientX - pf.getBoundingClientRect().left); // User Response
@@ -82,9 +101,12 @@ async function runRound() {
         var score = Math.floor(100 - (dist / (scale / 100))); // Score
         
         if(score > 0)
-        document.getElementById("roundScore").innerHTML = score;
-        else
-        document.getElementById("roundScore").innerHTML = 1;
+        document.getElementById("roundScore").innerHTML = "Round Score: " + score;
+        else {
+            score = 1;
+            document.getElementById("roundScore").innerHTML = "Round Score: " + score;
+        }
+        
 
         circleCorrect.style.left = (correctX + pf.getBoundingClientRect().left) + 'px'; // Positions the answer
         circleCorrect.style.top = (correctY + pf.getBoundingClientRect().top) + 'px'; // Positions the answer
@@ -93,20 +115,44 @@ async function runRound() {
         document.getElementById("circleCorrect").innerHTML = "Actual"
         document.getElementById("circleCorrect").style.display = "block";
         document.getElementById("circle").style.display = "block"; // Shows the answer circle
+        await new Promise(r => setTimeout(r, 500));
+
+        for(var i = 1; i <= score; i++) { // Incrementing the totalScore display (visual effect)
+            await new Promise(r => setTimeout(r, 10));
+            document.getElementById("totalScore").innerHTML = "Total: " + (totalScore + i);
+        }
+        totalScore += score;
+
+        await new Promise(r => setTimeout(r, 500));
+        if(roundNumber < totalRounds) {
+            document.getElementById("nextRoundButton").style.display = "block";
+        }
+        else {
+            document.getElementById("resultsButton").style.display = "block";
+        }
       }
+      
     }
 
+    function showResults() {
+        document.getElementById("menu").style.display = "none";
+        document.getElementById("game").style.display = "none";
+        document.getElementById("results").style.display = "block";
+        document.getElementById("resultScore").innerHTML = "Congratulations!\nYour Score is: " + totalScore;
+        console.log("Here's your score: " + totalScore)
+    }
 
  async function startGame() {
+    document.getElementById("pfCntr").style.color = 'black';
     totalScore = 0;
+    roundNumber = 0;
+    document.getElementById("roundNumber").innerHTML = "Round # 1";
+    resetPlayfield()
     document.getElementById("menu").style.display = "none";
-    document.getElementById("circle").style.display = "none";
-    document.getElementById("circleCorrect").style.display = "none";
+    document.getElementById("results").style.display = "none";
     document.getElementById("game").style.display = "block";
-        
+    document.getElementById("pfText").style.display = "block";
     document.getElementById("pfText").innerHTML = "Ready?" // Pre Game
     await new Promise(r => setTimeout(r, 1000));
-    //for(var i = 0; i < 10; i++) {
-        runRound();
-    //}
+    runRound();
 }

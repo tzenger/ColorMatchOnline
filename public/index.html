@@ -14,7 +14,7 @@
     <div class="container">
         <div class="header">
             <h1>Color Match Online</h1>
-            <p>An Online Color Match Copy</p>
+            <p>An Online Color Match Replica</p>
         </div>
         </div>
     
@@ -27,18 +27,30 @@
 
 <div class="container" id="game">
     <div class="pf" id="pf">
-        <p id="totalScore"></p>
         <div id="pfCntr">
             <p id="pfText"></p>
         </div>
         <div id="circleCorrect"></div>
         <div id="circle"></div>
         </div>
+        <p id="roundNumber"></p>
+        <p id="totalScore"></p>
         <p id="roundScore"></p>
+        <button onclick="runRound()" id="nextRoundButton">Next Round</button>
+        <button onclick="showResults()" id="resultsButton">See Your Results</button>
 </div>
 
+<div class="container" id="results">
+    <div id="score">
+        <h1 id="resultScore"></h1>
+        <button onclick="startGame()" id="playAgain">Play Again?</button>
+    </div>
+        
+</div>
+
+
 <div id="footer">
-    <a href="https://github.com/tzenger/Color-Match-Online" target="_blank">Click here to view the documentation of this project!</a>
+    <a href="https://github.com/tzenger/ColorMatchOnline" target="_blank">Click here to view the documentation of this project!</a>
 </div>
 
         <script src="backend.js"></script>
